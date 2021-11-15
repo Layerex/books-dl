@@ -84,15 +84,17 @@ def main():
 
     while True:
         try:
-            index = int(input()) - 1
+            indexes = tuple(map(int, input().split()))
             break
-        except TypeError:
+        except ValueError:
             continue
 
     if args.link:
-        print(books[index]["link"])
+        for index in indexes:
+            print(books[index]["link"])
     else:
-        download_book(books[index], args.directory or os.curdir, not args.no_cover)
+        for index in indexes:
+            download_book(books[index], args.directory or os.curdir, not args.no_cover)
 
 
 if __name__ == "__main__":
