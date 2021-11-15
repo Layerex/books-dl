@@ -5,6 +5,7 @@ __desc__ = "Консольная утилита для загрузки книж
 
 import argparse
 import os
+import sys
 
 import requests
 from bs4 import BeautifulSoup
@@ -21,6 +22,10 @@ HEADERS = {
 }
 
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
 def urljoin(*args):
     return "".join((URL, *args))
 
@@ -32,14 +37,14 @@ def get_book_name(book):
 def download_book(book: dict, directory: str, download_cover: bool):
     book_name = get_book_name(book)
     book_file_path = os.path.join(directory, book_name + ".html")
-    print(f"Загружаем книгу в {book_file_path}")
+    eprint(f"Загружаем книгу в {book_file_path}")
     book_text = requests.get(book["link"], headers=HEADERS).text
     with open(book_file_path, "w") as f:
         f.write(book_text)
 
     if download_cover:
         cover_file_path = os.path.join(directory, book_name + ".jpeg")
-        print(f"Загружаем обложку в {cover_file_path}")
+        eprint(f"Загружаем обложку в {cover_file_path}")
         with open(cover_file_path, "wb") as f:
             f.write(requests.get(book["cover"], headers=HEADERS).content)
 
@@ -71,10 +76,10 @@ def main():
         books.append(book)
 
     if not books:
-        print(f"Не найдено книг по запросу {args.query}")
+        eprint(f"Не найдено книг по запросу {args.query}")
         return
     for i, book in enumerate(reversed(books)):
-        print(f"{len(books) - i}. {get_book_name(book)}")
+        eprint(f"{len(books) - i}. {get_book_name(book)}")
 
     while True:
         try:
