@@ -56,6 +56,7 @@ def main():
         "-d", "--directory", metavar="Директория", type=str, help="Директория для загрузки книг. Если не указана, то используется текущая"
     )
     parser.add_argument("-nc", "--no-cover", action="store_true", help="Не загружать обложку")
+    parser.add_argument("-l", "--link", action="store_true", help="Вывести ссылку на книгу вместо загрузки")
     args = parser.parse_args()
 
     bs = BeautifulSoup(
@@ -88,7 +89,10 @@ def main():
         except TypeError:
             continue
 
-    download_book(books[index], args.directory or os.curdir, not args.no_cover)
+    if args.link:
+        print(books[index]["link"])
+    else:
+        download_book(books[index], args.directory or os.curdir, not args.no_cover)
 
 
 if __name__ == "__main__":
