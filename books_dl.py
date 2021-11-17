@@ -34,9 +34,9 @@ def urljoin(*args):
 def get_book_name(book, max_length: Optional[int] = None):
     if max_length is not None:
         length = 0
-        length += len(book["name"]) # Название книги
+        length += len(book["name"])  # Название книги
         length += len(book["authors"]) * 2  # Запятые
-        length += 3 + 3 # Тире и многоточие
+        length += 3 + 3  # Тире и многоточие
         for i, author in enumerate(book["authors"]):
             length += len(author)
             if length > max_length:
@@ -58,7 +58,10 @@ def get_book_name(book, max_length: Optional[int] = None):
 
 
 def download_book(
-    book: dict, directory: str, download_cover: bool, max_file_name_length: Optional[int] = None
+    book: dict,
+    directory: str,
+    download_cover: bool,
+    max_file_name_length: Optional[int] = None,
 ):
     MAX_FILE_EXTENSION_LENGTH = 5
     if max_file_name_length is not None:
@@ -101,7 +104,7 @@ def main():
         metavar="Длина",
         type=int,
         default=128,
-        help="Максимальная длина имени файла, по умолчанию 128 символов."
+        help="Максимальная длина имени файла, по умолчанию 128 символов.",
     )
     args = parser.parse_args()
 
@@ -140,7 +143,12 @@ def main():
             print(books[index]["link"])
     else:
         for index in indexes:
-            download_book(books[index], args.directory or os.curdir, not args.no_cover, args.max_file_name_length)
+            download_book(
+                books[index],
+                args.directory or os.curdir,
+                not args.no_cover,
+                args.max_file_name_length,
+            )
 
 
 if __name__ == "__main__":
