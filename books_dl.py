@@ -6,6 +6,7 @@ __desc__ = "Консольная утилита для загрузки книж
 import argparse
 import os
 import sys
+from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -30,12 +31,39 @@ def urljoin(*args):
     return "".join((URL, *args))
 
 
-def get_book_name(book):
-    return " - ".join((", ".join(book["authors"]), book["name"]))
+def get_book_name(book, max_length: Optional[int] = None):
+    if max_length is not None:
+        length = 0
+        length += len(book["name"]) # Название книги
+        length += len(book["authors"]) * 2  # Запятые
+        length += 3 + 3 # Тире и многоточие
+        for i, author in enumerate(book["authors"]):
+            length += len(author)
+            if length > max_length:
+                if i == 0:  # Хотя бы один автор в названии должен быть
+                    i += 1
+                n = i
+                book["authors"][i - 1] += ", ..."  # Костыли-костыли
+                break
+        else:
+            n = len(book["authors"])
+    else:
+        n = len(book["authors"])
+    name = " - ".join((", ".join(book["authors"][:n]), book["name"]))
+    if max_length is not None:
+        # Если название всё ещё слишком длинное, то просто обрезаем его конец
+        if len(name) > max_length:
+            name = name[:max_length]
+    return name
 
 
-def download_book(book: dict, directory: str, download_cover: bool):
-    book_name = get_book_name(book)
+def download_book(
+    book: dict, directory: str, download_cover: bool, max_file_name_length: Optional[int] = None
+):
+    MAX_FILE_EXTENSION_LENGTH = 5
+    if max_file_name_length is not None:
+        max_file_name_length -= MAX_FILE_EXTENSION_LENGTH
+    book_name = get_book_name(book, max_file_name_length)
     book_file_path = os.path.join(directory, book_name + ".html")
     eprint(f"Загружаем книгу в {book_file_path}")
     book_text = requests.get(book["link"], headers=HEADERS).text
@@ -53,10 +81,28 @@ def main():
     parser = argparse.ArgumentParser(description=__desc__)
     parser.add_argument("query", metavar="Запрос", type=str, help="Запрос для поиска")
     parser.add_argument(
-        "-d", "--directory", metavar="Директория", type=str, help="Директория для загрузки книг. Если не указана, то используется текущая"
+        "-d",
+        "--directory",
+        metavar="Директория",
+        type=str,
+        help="Директория для загрузки книг. Если не указана, то используется текущая",
     )
-    parser.add_argument("-nc", "--no-cover", action="store_true", help="Не загружать обложку")
-    parser.add_argument("-l", "--link", action="store_true", help="Вывести ссылку на книгу вместо загрузки")
+    parser.add_argument(
+        "-nc", "--no-cover", action="store_true", help="Не загружать обложку"
+    )
+    parser.add_argument(
+        "-l",
+        "--link",
+        action="store_true",
+        help="Вывести ссылку на книгу вместо загрузки",
+    )
+    parser.add_argument(
+        "--max-file-name-length",
+        metavar="Длина",
+        type=int,
+        default=128,
+        help="Максимальная длина имени файла, по умолчанию 128 символов."
+    )
     args = parser.parse_args()
 
     bs = BeautifulSoup(
@@ -72,7 +118,7 @@ def main():
         book["cover"] = urljoin(tds[0].img["src"])
         book["id"] = tds[1].text
         book["name"] = tds[2].text
-        book["authors"] = tuple((a.text for a in tds[5].find_all("a")))
+        book["authors"] = list((a.text for a in tds[5].find_all("a")))
         book["link"] = urljoin(tds[6].a["href"])
         books.append(book)
 
@@ -94,7 +140,7 @@ def main():
             print(books[index]["link"])
     else:
         for index in indexes:
-            download_book(books[index], args.directory or os.curdir, not args.no_cover)
+            download_book(books[index], args.directory or os.curdir, not args.no_cover, args.max_file_name_length)
 
 
 if __name__ == "__main__":
