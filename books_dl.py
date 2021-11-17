@@ -84,7 +84,7 @@ def main():
 
     while True:
         try:
-            indexes = tuple(map(int, input().split()))
+            indexes = tuple(map(lambda x: x - 1, map(int, input().split())))
             break
         except ValueError:
             continue
