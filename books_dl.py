@@ -32,15 +32,15 @@ class ExitCodes(IntEnum):
     NOTHING_TO_DO = 255
 
 
-def eprint(*args, **kwargs):
+def eprint(*args, **kwargs) -> None:
     print(*args, file=sys.stderr, **kwargs)
 
 
-def urljoin(*args):
+def urljoin(*args) -> str:
     return "".join((URL, *args))
 
 
-def get_book_name(book, max_length: Optional[int] = None):
+def get_book_name(book: dict, max_length: Optional[int] = None) -> str:
     if max_length is not None:
         length = 0
         length += len(book["name"])  # Название книги
@@ -75,8 +75,8 @@ def download_book(
     directory: str,
     download_cover: bool,
     max_file_name_length: Optional[int] = None,
-    book_text=None,
-):
+    book_text: str = None,
+) -> None:
     MAX_FILE_EXTENSION_LENGTH = 5
     if max_file_name_length is not None:
         max_file_name_length -= MAX_FILE_EXTENSION_LENGTH
@@ -118,7 +118,7 @@ def get_search_results(query) -> list[dict]:
     return books
 
 
-def download_by_query(query, link, download_book_f):
+def download_by_query(query: str, link: bool, download_book_f) -> None:
     books = get_search_results(query)
 
     if not books:
@@ -142,7 +142,7 @@ def download_by_query(query, link, download_book_f):
             download_book_f(books[index])
 
 
-def download_by_id(id, link, download_book_f):
+def download_by_id(id: int, link: bool, download_book_f) -> None:
     id = str(id)
     book = {}
     book["link"] = urljoin(READ_ENDPOINT, id)
