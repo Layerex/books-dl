@@ -42,5 +42,11 @@ books-dl -d ~/documents/books/ --no-cover "'$*'"
 ```sh
 #!/usr/bin/env sh
 
+books-dl -d ~/documents/books/ --no-cover -i "$1"
+```
+
+```sh
+#!/usr/bin/env sh
+
 books-dl -l "'$*'"
 ```
