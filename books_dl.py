@@ -149,7 +149,7 @@ def download_by_id(id: int, link: bool, download_book_f) -> None:
     if link:
         print(book["link"])
         exit(ExitCodes.SUCCESS)
-    eprint(f"Загружаем книгу c id {id}...")
+    eprint(f"Загружаем книгу c ID {id}...")
     book_text = get_book_text(book)
     bs = BeautifulSoup(book_text, "html.parser")
     book["name"] = bs.find("head").find("title").text
