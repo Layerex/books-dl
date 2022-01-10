@@ -83,16 +83,16 @@ def download_book(
     book_name = get_book_name(book, max_file_name_length)
     book_file_path = os.path.join(directory, book_name + ".html")
     if book_text is None:
-        eprint(f"Загружаем книгу в {book_file_path}")
+        eprint(f"Загружаем книгу в {book_file_path}...")
         book_text = get_book_text(book)
     else:
-        eprint(f"Книга загружена в {book_file_path}")
+        eprint(f"Книга загружена в {book_file_path}.")
     with open(book_file_path, "w") as f:
         f.write(book_text)
 
     if download_cover:
         cover_file_path = os.path.join(directory, book_name + ".jpeg")
-        eprint(f"Загружаем обложку в {cover_file_path}")
+        eprint(f"Загружаем обложку в {cover_file_path}...")
         with open(cover_file_path, "wb") as f:
             f.write(requests.get(book["cover"], headers=HEADERS).content)
 
@@ -122,7 +122,7 @@ def download_by_query(query, link, download_book_f):
     books = get_search_results(query)
 
     if not books:
-        eprint(f"Не найдено книг по запросу {args.query}")
+        eprint(f"Не найдено книг по запросу {args.query}.")
         exit(ExitCodes.NOTHING_FOUND_BY_QUERY)
     for i, book in enumerate(reversed(books)):
         eprint(f"{len(books) - i}. {get_book_name(book)}")
@@ -149,7 +149,7 @@ def download_by_id(id, link, download_book_f):
     if link:
         print(book["link"])
         exit(ExitCodes.SUCCESS)
-    eprint(f"Загружаем книгу c id {id}")
+    eprint(f"Загружаем книгу c id {id}...")
     book_text = get_book_text(book)
     bs = BeautifulSoup(book_text, "html.parser")
     book["name"] = bs.find("head").find("title").text
@@ -202,7 +202,7 @@ def main():
         metavar="Длина",
         type=int,
         default=128,
-        help="Максимальная длина имени файла, по умолчанию 128 символов.",
+        help="Максимальная длина имени файла, по умолчанию 128 символов",
     )
     args = parser.parse_args()
 
