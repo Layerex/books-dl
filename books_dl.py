@@ -6,6 +6,7 @@ __desc__ = "Консольная утилита для загрузки книж
 import argparse
 import os
 import sys
+from enum import IntEnum
 from typing import Optional
 
 import requests
@@ -22,6 +23,13 @@ HEADERS = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "accept-language": "en-US,en;q=0.9",
 }
+
+
+class ExitCodes(IntEnum):
+    SUCCESS = 0
+    NOTHING_FOUND_BY_QUERY = 1
+    UNDOWNLOADABLE_BY_ID = 2
+    NOTHING_TO_DO = 255
 
 
 def eprint(*args, **kwargs):
@@ -115,7 +123,7 @@ def download_by_query(query, link, download_book_f):
 
     if not books:
         eprint(f"Не найдено книг по запросу {args.query}")
-        return
+        exit(ExitCodes.NOTHING_FOUND_BY_QUERY)
     for i, book in enumerate(reversed(books)):
         eprint(f"{len(books) - i}. {get_book_name(book)}")
 
@@ -140,7 +148,7 @@ def download_by_id(id, link, download_book_f):
     book["link"] = urljoin(READ_ENDPOINT, id)
     if link:
         print(book["link"])
-        return
+        exit(ExitCodes.SUCCESS)
     eprint(f"Загружаем книгу c id {id}")
     book_text = get_book_text(book)
     bs = BeautifulSoup(book_text, "html.parser")
@@ -154,7 +162,7 @@ def download_by_id(id, link, download_book_f):
         print(
             "Загрузить книгу по ID не удалось. Попробуйте сделать это с помощью поиска."
         )
-        return
+        exit(ExitCodes.UNDOWNLOADABLE_BY_ID)
     download_book_f(book, book_text=book_text)
 
 
@@ -210,6 +218,10 @@ def main():
         download_by_id(args.id, args.link, download_book_f)
     elif args.query is not None:
         download_by_query(args.query, args.link, download_book_f)
+    else:
+        exit(ExitCodes.NOTHING_TO_DO)
+    exit(ExitCodes.SUCCESS)
+
 
 if __name__ == "__main__":
     main()
