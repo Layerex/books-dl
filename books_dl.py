@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 
 URL = "http://213.5.52.16/"
 SEARCH_ENDPOINT = "search_2.php?user_name="
+READ_ENDPOINT = "book/read.php?id="
 HEADERS = {
     "connection": "keep-alive",
     "cache-control": "max-age=0",
@@ -57,19 +58,27 @@ def get_book_name(book, max_length: Optional[int] = None):
     return name
 
 
+def get_book_text(book: dict) -> str:
+    return requests.get(book["link"], headers=HEADERS).text
+
+
 def download_book(
     book: dict,
     directory: str,
     download_cover: bool,
     max_file_name_length: Optional[int] = None,
+    book_text=None,
 ):
     MAX_FILE_EXTENSION_LENGTH = 5
     if max_file_name_length is not None:
         max_file_name_length -= MAX_FILE_EXTENSION_LENGTH
     book_name = get_book_name(book, max_file_name_length)
     book_file_path = os.path.join(directory, book_name + ".html")
-    eprint(f"Загружаем книгу в {book_file_path}")
-    book_text = requests.get(book["link"], headers=HEADERS).text
+    if book_text is None:
+        eprint(f"Загружаем книгу в {book_file_path}")
+        book_text = get_book_text(book)
+    else:
+        eprint(f"Книга загружена в {book_file_path}")
     with open(book_file_path, "w") as f:
         f.write(book_text)
 
@@ -80,9 +89,90 @@ def download_book(
             f.write(requests.get(book["cover"], headers=HEADERS).content)
 
 
+def get_search_results(query) -> list[dict]:
+    bs = BeautifulSoup(
+        requests.get("".join((URL, SEARCH_ENDPOINT, query)), headers=HEADERS).text,
+        "html.parser",
+    )
+
+    books = []
+    trs = bs.find("table", cellspacing="1", border="1").find_all("tr")
+    for tr in trs:
+        tds = tuple(tr.find_all("td"))
+        book = {}
+        book["cover"] = urljoin(tds[0].img["src"])
+        book["id"] = tds[1].text
+        book["name"] = tds[2].text
+        book["authors"] = list((a.text for a in tds[5].find_all("a")))
+        book["link"] = urljoin(tds[6].a["href"])
+        books.append(book)
+
+    return books
+
+
+def download_by_query(query, link, download_book_f):
+    books = get_search_results(query)
+
+    if not books:
+        eprint(f"Не найдено книг по запросу {args.query}")
+        return
+    for i, book in enumerate(reversed(books)):
+        eprint(f"{len(books) - i}. {get_book_name(book)}")
+
+    while True:
+        try:
+            indexes = tuple(map(lambda x: x - 1, map(int, input().split())))
+            break
+        except ValueError:
+            continue
+
+    if link:
+        for index in indexes:
+            print(books[index]["link"])
+    else:
+        for index in indexes:
+            download_book_f(books[index])
+
+
+def download_by_id(id, link, download_book_f):
+    id = str(id)
+    book = {}
+    book["link"] = urljoin(READ_ENDPOINT, id)
+    if link:
+        print(book["link"])
+        return
+    eprint(f"Загружаем книгу c id {id}")
+    book_text = get_book_text(book)
+    bs = BeautifulSoup(book_text, "html.parser")
+    book["name"] = bs.find("head").find("title").text
+    search_results = get_search_results(book["name"])
+    for result in search_results:
+        if result["id"] == id:
+            book = result
+            break
+    else:
+        print(
+            "Загрузить книгу по ID не удалось. Попробуйте сделать это с помощью поиска."
+        )
+        return
+    download_book_f(book, book_text=book_text)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__desc__)
-    parser.add_argument("query", metavar="Запрос", type=str, help="Запрос для поиска")
+    parser.add_argument(
+        "query",
+        metavar="Запрос",
+        type=str,
+        nargs="?",
+        help="Запрос для поиска",
+    )
+    parser.add_argument(
+        "-i",
+        "--id",
+        metavar="ID книги",
+        type=int,
+    )
     parser.add_argument(
         "-d",
         "--directory",
@@ -108,48 +198,18 @@ def main():
     )
     args = parser.parse_args()
 
-    bs = BeautifulSoup(
-        requests.get("".join((URL, SEARCH_ENDPOINT, args.query)), headers=HEADERS).text,
-        "html.parser",
+    download_book_f = lambda book, **kwargs: download_book(
+        book,
+        args.directory or os.curdir,
+        not args.no_cover,
+        args.max_file_name_length,
+        **kwargs,
     )
 
-    books = []
-    trs = bs.find("table", cellspacing="1", border="1").find_all("tr")
-    for tr in trs:
-        tds = tuple(tr.find_all("td"))
-        book = {}
-        book["cover"] = urljoin(tds[0].img["src"])
-        book["id"] = tds[1].text
-        book["name"] = tds[2].text
-        book["authors"] = list((a.text for a in tds[5].find_all("a")))
-        book["link"] = urljoin(tds[6].a["href"])
-        books.append(book)
-
-    if not books:
-        eprint(f"Не найдено книг по запросу {args.query}")
-        return
-    for i, book in enumerate(reversed(books)):
-        eprint(f"{len(books) - i}. {get_book_name(book)}")
-
-    while True:
-        try:
-            indexes = tuple(map(lambda x: x - 1, map(int, input().split())))
-            break
-        except ValueError:
-            continue
-
-    if args.link:
-        for index in indexes:
-            print(books[index]["link"])
-    else:
-        for index in indexes:
-            download_book(
-                books[index],
-                args.directory or os.curdir,
-                not args.no_cover,
-                args.max_file_name_length,
-            )
-
+    if args.id is not None:
+        download_by_id(args.id, args.link, download_book_f)
+    elif args.query is not None:
+        download_by_query(args.query, args.link, download_book_f)
 
 if __name__ == "__main__":
     main()
