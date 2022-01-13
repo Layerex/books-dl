@@ -131,8 +131,9 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
     if not books:
         eprint(f"Не найдено книг по запросу {query}.")
         exit(ExitCodes.NOTHING_FOUND_BY_QUERY)
-    for i, book in enumerate(reversed(books)):
-        eprint(f"{len(books) - i}. {get_book_name(book)}")
+    book_names = tuple(map(get_book_name, books))
+    for i in range(len(books)):
+        eprint(f"{len(books) - i}. {book_names[len(books) - i - 1]}")
 
     while True:
         try:
@@ -146,7 +147,7 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
             print(books[index]["link"])
     else:
         for index in indexes:
-            download_book_f(books[index])
+            download_book_f(books[index], book_name=book_names[index])
 
 
 def download_by_id(id: int, link: bool, download_book_f) -> None:
