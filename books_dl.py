@@ -60,7 +60,7 @@ def get_book_name(book: dict, max_length: Optional[int] = None, book_information
                 n = len(book["authors"])
         else:
             n = len(book["authors"])
-    name = " - ".join((", ".join(book["authors"][:n]), book["name"]))
+        name = " - ".join((", ".join(book["authors"][:n]), book["name"]))
     if max_length is not None:
         # Если название всё ещё слишком длинное, то просто обрезаем его конец
         if len(name) > max_length:
