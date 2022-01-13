@@ -46,6 +46,7 @@ def get_book_name(book: dict, max_length: Optional[int] = None, book_information
         if max_length is not None:
             length = 0
             length += len(book["name"])  # Название книги
+            length += len(book["collection"])
             length += len(book["authors"]) * 2  # Запятые
             length += 3 + 3  # Тире и многоточие
             for i, author in enumerate(book["authors"]):
@@ -61,6 +62,8 @@ def get_book_name(book: dict, max_length: Optional[int] = None, book_information
         else:
             n = len(book["authors"])
         name = " - ".join((", ".join(book["authors"][:n]), book["name"]))
+        if book["collection"]:
+            name += f' ({book["collection"]})'
     if max_length is not None:
         # Если название всё ещё слишком длинное, то просто обрезаем его конец
         if len(name) > max_length:
@@ -120,6 +123,7 @@ def get_search_results(query) -> list[dict]:
         book["cover"] = urljoin(tds[0].img["src"])
         book["id"] = tds[1].text
         book["name"] = clean(tds[2].text)
+        book["collection"] = clean(tds[3].text)
         book["authors"] = list((clean(a.text) for a in tds[5].find_all("a")))
         book["link"] = urljoin(tds[6].a["href"])
         books.append(book)
