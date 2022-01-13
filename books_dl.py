@@ -77,6 +77,7 @@ def download_book(
     directory: str,
     download_cover: bool,
     max_file_name_length: Optional[int] = None,
+    book_name: str = None,
     book_text: str = None,
     book_information_incomplete: bool = False
 ) -> None:
@@ -84,7 +85,8 @@ def download_book(
     if max_file_name_length is not None:
         max_file_name_length -= MAX_FILE_EXTENSION_LENGTH
 
-    book_name = get_book_name(book, max_file_name_length, book_information_incomplete)
+    if book_name is None:
+        book_name = get_book_name(book, max_file_name_length, book_information_incomplete)
     book_file_path = os.path.join(directory, book_name + ".html")
     if book_text is None:
         eprint(f"Загружаем книгу в {book_file_path}...")
