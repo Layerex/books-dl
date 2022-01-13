@@ -109,13 +109,16 @@ def get_search_results(query) -> list[dict]:
 
     books = []
     trs = bs.find("table", cellspacing="1", border="1").find_all("tr")
+
+    def clean(s: str):
+        return s.strip(' []"')
     for tr in trs:
         tds = tuple(tr.find_all("td"))
         book = {}
         book["cover"] = urljoin(tds[0].img["src"])
         book["id"] = tds[1].text
-        book["name"] = tds[2].text
-        book["authors"] = list((a.text for a in tds[5].find_all("a")))
+        book["name"] = clean(tds[2].text)
+        book["authors"] = list((clean(a.text) for a in tds[5].find_all("a")))
         book["link"] = urljoin(tds[6].a["href"])
         books.append(book)
 
