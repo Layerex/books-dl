@@ -126,7 +126,7 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
     books = get_search_results(query)
 
     if not books:
-        eprint(f"Не найдено книг по запросу {args.query}.")
+        eprint(f"Не найдено книг по запросу {query}.")
         exit(ExitCodes.NOTHING_FOUND_BY_QUERY)
     for i, book in enumerate(reversed(books)):
         eprint(f"{len(books) - i}. {get_book_name(book)}")
