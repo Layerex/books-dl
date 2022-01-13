@@ -28,7 +28,6 @@ HEADERS = {
 class ExitCodes(IntEnum):
     SUCCESS = 0
     NOTHING_FOUND_BY_QUERY = 1
-    UNDOWNLOADABLE_BY_ID = 2
     NOTHING_TO_DO = 255
 
 
@@ -40,24 +39,27 @@ def urljoin(*args) -> str:
     return "".join((URL, *args))
 
 
-def get_book_name(book: dict, max_length: Optional[int] = None) -> str:
-    if max_length is not None:
-        length = 0
-        length += len(book["name"])  # Название книги
-        length += len(book["authors"]) * 2  # Запятые
-        length += 3 + 3  # Тире и многоточие
-        for i, author in enumerate(book["authors"]):
-            length += len(author)
-            if length > max_length:
-                if i == 0:  # Хотя бы один автор в названии должен быть
-                    i += 1
-                n = i
-                book["authors"][i - 1] += ", ..."  # Костыли-костыли
-                break
+def get_book_name(book: dict, max_length: Optional[int] = None, book_information_incomplete: bool = False) -> str:
+    if book_information_incomplete: # То есть, есть только название и id
+        name = f'{book["name"]} ({book["id"]})'
+    else:
+        if max_length is not None:
+            length = 0
+            length += len(book["name"])  # Название книги
+            length += len(book["authors"]) * 2  # Запятые
+            length += 3 + 3  # Тире и многоточие
+            for i, author in enumerate(book["authors"]):
+                length += len(author)
+                if length > max_length:
+                    if i == 0:  # Хотя бы один автор в названии должен быть
+                        i += 1
+                    n = i
+                    book["authors"][i - 1] += ", ..."  # Костыли-костыли
+                    break
+            else:
+                n = len(book["authors"])
         else:
             n = len(book["authors"])
-    else:
-        n = len(book["authors"])
     name = " - ".join((", ".join(book["authors"][:n]), book["name"]))
     if max_length is not None:
         # Если название всё ещё слишком длинное, то просто обрезаем его конец
@@ -76,11 +78,13 @@ def download_book(
     download_cover: bool,
     max_file_name_length: Optional[int] = None,
     book_text: str = None,
+    book_information_incomplete: bool = False
 ) -> None:
     MAX_FILE_EXTENSION_LENGTH = 5
     if max_file_name_length is not None:
         max_file_name_length -= MAX_FILE_EXTENSION_LENGTH
-    book_name = get_book_name(book, max_file_name_length)
+
+    book_name = get_book_name(book, max_file_name_length, book_information_incomplete)
     book_file_path = os.path.join(directory, book_name + ".html")
     if book_text is None:
         eprint(f"Загружаем книгу в {book_file_path}...")
@@ -159,10 +163,9 @@ def download_by_id(id: int, link: bool, download_book_f) -> None:
             book = result
             break
     else:
-        print(
-            "Загрузить книгу по ID не удалось. Попробуйте сделать это с помощью поиска."
-        )
-        exit(ExitCodes.UNDOWNLOADABLE_BY_ID)
+        book["id"] = id
+        eprint("Не удалось получить полную информацию о книге.")
+        download_book_f(book, book_text=book_text, book_information_incomplete=True)
     download_book_f(book, book_text=book_text)
 
 
