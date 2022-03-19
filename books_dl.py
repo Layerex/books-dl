@@ -116,7 +116,12 @@ def get_search_results(query) -> list[dict]:
     trs = bs.find("table", cellspacing="1", border="1").find_all("tr")
 
     def clean(s: str):
-        return s.strip(' []"')
+        s = s.strip()
+        if len(s) >= 2:
+            if s[0] == "[" and s[-1] == "]":
+                s = s[1:-1]
+            s = s.strip()
+        return s
     for tr in trs:
         tds = tuple(tr.find_all("td"))
         book = {}
