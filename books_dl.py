@@ -39,30 +39,64 @@ def urljoin(*args) -> str:
     return "".join((URL, *args))
 
 
-def get_book_name(book: dict, max_length: Optional[int] = None, book_information_incomplete: bool = False) -> str:
-    if book_information_incomplete: # То есть, есть только название и id
+def get_book_name(
+    book: dict,
+    max_length: Optional[int] = None,
+    book_information_incomplete: bool = False,
+) -> str:
+    if book_information_incomplete:  # То есть, есть только название и id
         name = f'{book["name"]} ({book["id"]})'
     else:
+        NAME_AND_AUTHORS_SEPARATOR = " - "
+        AUTHORS_SEPARATOR = ", "
+        ELLIPSIS = ", ..."
+        COLLECTION_SEPARATOR_LENGTH = 3
+
+        need_ellipsis = False
+        need_collection = False
         if max_length is not None:
             length = 0
-            length += len(book["name"])  # Название книги
-            length += len(book["collection"])
-            length += len(book["authors"]) * 2  # Запятые
-            length += 3 + 3  # Тире и многоточие
+            length += len(book["name"])
+            length += len(NAME_AND_AUTHORS_SEPARATOR)
+            if book["collection"]:
+                need_collection = True
+                collection_length = (
+                    len(book["collection"]) + COLLECTION_SEPARATOR_LENGTH
+                )
+                length += collection_length
             for i, author in enumerate(book["authors"]):
-                length += len(author)
+                length += len(author) + len(AUTHORS_SEPARATOR)
                 if length > max_length:
+                    if need_collection:
+                        need_collection = False
+                        length -= collection_length
+                        if length <= max_length:
+                            continue
+                    length -= len(AUTHORS_SEPARATOR)
                     if i == 0:  # Хотя бы один автор в названии должен быть
-                        i += 1
+                        i = 1
+                    need_ellipsis = True
+                    if length > max_length:
+
+                        def make_space_for_ellipsis():
+                            nonlocal i, length
+                            if not (max_length - length < len(ELLIPSIS) or i == 1):
+                                i -= 1
+                                length -= len(book["authors"][i - 1])
+                                make_space_for_ellipsis()
+
+                        make_space_for_ellipsis()
                     n = i
-                    book["authors"][i - 1] += ", ..."  # Костыли-костыли
                     break
             else:
                 n = len(book["authors"])
         else:
             n = len(book["authors"])
-        name = " - ".join((", ".join(book["authors"][:n]), book["name"]))
-        if book["collection"]:
+        authors = ", ".join(book["authors"][:n])
+        if need_ellipsis:
+            authors += ELLIPSIS
+        name = " - ".join((authors, book["name"]))
+        if need_collection:
             name += f' ({book["collection"]})'
     if max_length is not None:
         # Если название всё ещё слишком длинное, то просто обрезаем его конец
@@ -88,8 +122,7 @@ def download_book(
     if max_file_name_length is not None:
         max_file_name_length -= MAX_FILE_EXTENSION_LENGTH
 
-    if book_name is None:
-        book_name = get_book_name(book, max_file_name_length, book_information_incomplete)
+    book_name = get_book_name(book, max_file_name_length, book_information_incomplete)
     book_file_path = os.path.join(directory, book_name + ".html")
     if book_text is None:
         eprint(f"Загружаем книгу в {book_file_path}...")
@@ -122,6 +155,7 @@ def get_search_results(query) -> list[dict]:
                 s = s[1:-1]
             s = s.strip()
         return s
+
     for tr in trs:
         tds = tuple(tr.find_all("td"))
         book = {}
