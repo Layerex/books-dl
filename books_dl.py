@@ -190,7 +190,7 @@ def main():
         "query",
         metavar="Запрос",
         type=str,
-        nargs="?",
+        nargs="*",
         help="Запрос для поиска",
     )
     parser.add_argument(
@@ -223,6 +223,7 @@ def main():
         help="Максимальная длина имени файла, по умолчанию 128 символов",
     )
     args = parser.parse_args()
+    args.query = " ".join(args.query)
 
     download_book_f = lambda book, **kwargs: download_book(
         book,
