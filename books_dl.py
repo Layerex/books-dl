@@ -118,9 +118,9 @@ def download_book(
     book_text: str = None,
     book_information_incomplete: bool = False
 ) -> None:
-    MAX_FILE_EXTENSION_LENGTH = 5
     if max_file_name_length is not None:
-        max_file_name_length -= MAX_FILE_EXTENSION_LENGTH
+        FILE_EXTENSION_LENGTH = 5
+        max_file_name_length -= FILE_EXTENSION_LENGTH
 
     book_name = get_book_name(book, max_file_name_length, book_information_incomplete)
     book_file_path = os.path.join(directory, book_name + ".html")
