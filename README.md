@@ -11,7 +11,7 @@ pip install books-dl
 ## Использование
 
 ```
-usage: books_dl.py [-h] [-i ID книги] [-d Директория] [-nc] [-l] [--max-file-name-length Длина] [Запрос ...]
+usage: books_dl [-h] [-i ID книги] [-d Директория] [-nc] [-l] [--max-file-name-length Длина] [Запрос ...]
 
 Консольная утилита для загрузки книжек с одного замечательного сайта
 
