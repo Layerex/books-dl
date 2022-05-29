@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+__prog__ = "books-dl"
 __version__ = "0.0.6"
 __desc__ = "Консольная утилита для загрузки книжек с одного замечательного сайта"
 
@@ -219,7 +220,7 @@ def download_by_id(id: int, link: bool, download_book_f) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__desc__)
+    parser = argparse.ArgumentParser(prog=__prog__, description=__desc__)
     parser.add_argument(
         "query",
         metavar="Запрос",
