@@ -114,9 +114,9 @@ def download_book(
     directory: str,
     download_cover: bool,
     max_file_name_length: Optional[int] = None,
-    book_name: str = None,
-    book_text: str = None,
-    book_information_incomplete: bool = False
+    book_name: Optional[str] = None,
+    book_text: Optional[str] = None,
+    book_information_incomplete: bool = False,
 ) -> None:
     if max_file_name_length is not None:
         FILE_EXTENSION_LENGTH = 5
