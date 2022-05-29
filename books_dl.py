@@ -220,7 +220,11 @@ def download_by_id(id: int, link: bool, download_book_f) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(prog=__prog__, description=__desc__)
+    parser = argparse.ArgumentParser(
+        prog=__prog__,
+        description=__desc__,
+        epilog="Примечание: имя автора всегда следует вводить на русском языке, даже если искомая книжка не на нём.",
+    )
     parser.add_argument(
         "query",
         metavar="Запрос",
