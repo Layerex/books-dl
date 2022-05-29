@@ -1,20 +1,20 @@
 import setuptools
 
-from books_dl import __desc__, __version__
-
+module_name = "books_dl"
+from books_dl import __prog__, __desc__, __version__
 
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="books-dl",
+    name=__prog__,
     version=__version__,
     author="Layerex",
     author_email="layerex@dismail.de",
     description=__desc__,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Layerex/books-dl",
+    url=f"https://github.com/Layerex/{__prog__}",
     classifiers=[
         "Development Status :: 6 - Mature",
         "Programming Language :: Python :: 3",
@@ -22,10 +22,10 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Utilities",
     ],
-    py_modules=["books_dl"],
+    py_modules=[module_name],
     entry_points = {
         "console_scripts": [
-            "books-dl = books_dl:main",
+            f"{__prog__} = {module_name}:main",
         ],
     },
     install_requires=["beautifulsoup4", "requests"],
