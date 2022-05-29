@@ -51,3 +51,7 @@ ENV/
 env.bak/
 venv.bak/
 pythonenv*
+
+# Downloaded files
+*.html
+*.jpeg
