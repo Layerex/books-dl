@@ -275,7 +275,10 @@ def main():
         help="Максимальная длина имени файла, по умолчанию 128 символов",
     )
     args = parser.parse_args()
-    args.query = " ".join(args.query)
+    args.query = " ".join(args.query).strip()
+    if not args.query and not args.id:
+        eprint("Передан пустой запрос.")
+        exit(ExitCodes.NOTHING_FOUND_BY_QUERY)
 
     download_book_f = lambda book, **kwargs: download_book(
         book,
