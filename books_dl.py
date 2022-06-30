@@ -136,8 +136,12 @@ def download_book(
     if download_cover:
         cover_file_path = os.path.join(directory, book_name + ".jpeg")
         eprint(f"Загружаем обложку в {cover_file_path}...")
-        with open(cover_file_path, "wb") as f:
-            f.write(requests.get(book["cover"], headers=HEADERS).content)
+        response = requests.get(book["cover"], headers=HEADERS)
+        if response.text in ("", "нет облдожки", "нет обложки"):
+            eprint("Обложки нет.")
+        else:
+            with open(cover_file_path, "wb") as f:
+                f.write(response.content)
 
 
 def get_search_results(query) -> list[dict]:
