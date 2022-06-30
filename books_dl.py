@@ -171,6 +171,19 @@ def get_search_results(query) -> list[dict]:
     return books
 
 
+def parse_indexes(indexes_string: str) -> list[int]:
+    indexes = []
+    for index in indexes_string.split():
+        parts = tuple(map(lambda x: x - 1, map(int, index.split("-"))))
+        if len(parts) == 1:
+            indexes.append(parts[0])
+        elif len(parts) == 2:
+            indexes += list(range(parts[0], parts[1] + 1))
+        else:
+            raise ValueError("Can't parse indexes")
+    return indexes
+
+
 def download_by_query(query: str, link: bool, download_book_f) -> None:
     books = get_search_results(query)
 
@@ -181,12 +194,12 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
     for i in range(len(books)):
         eprint(f"{len(books) - i}. {book_names[len(books) - i - 1]}")
 
-    while True:
+    indexes = []
+    while not indexes:
         try:
-            indexes = tuple(map(lambda x: x - 1, map(int, input().split())))
-            break
+            indexes = parse_indexes(input())
         except ValueError:
-            continue
+            pass
 
     if link:
         for index in indexes:
@@ -223,7 +236,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog=__prog__,
         description=__desc__,
-        epilog="Примечание: имя автора всегда следует вводить на русском языке, даже если искомая книжка не на нём.",
+        epilog="Имя автора всегда следует вводить на русском языке, даже если искомая книжка не на нём. При вводе номеров книг можно использовать диапазоны: 2-5 - книги со второй по пятую включительно.",
     )
     parser.add_argument(
         "query",
