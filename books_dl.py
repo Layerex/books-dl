@@ -175,10 +175,12 @@ def get_search_results(query) -> list[dict]:
     return books
 
 
-def parse_indexes(indexes_string: str) -> list[int]:
+def parse_indexes(indexes_string: str, index_max: int) -> list[int]:
     indexes = []
     for index in indexes_string.split():
         parts = tuple(map(lambda x: x - 1, map(int, index.split("-"))))
+        if parts[-1] >= index_max:
+            raise ValueError("Index out of range")
         if len(parts) == 1:
             indexes.append(parts[0])
         elif len(parts) == 2:
@@ -201,7 +203,7 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
     indexes = []
     while not indexes:
         try:
-            indexes = parse_indexes(input())
+            indexes = parse_indexes(input(), len(books))
         except ValueError:
             pass
 
