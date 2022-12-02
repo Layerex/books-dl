@@ -28,8 +28,9 @@ HEADERS = {
 
 class ExitCodes(IntEnum):
     SUCCESS = 0
-    NOTHING_FOUND_BY_QUERY = 1
-    NOTHING_TO_DO = 255
+    INVALID_ARGUMENTS = 2
+    BOOK_NOT_FOUND = 3
+    NO_BOOKS_FOUND = 4
 
 
 def eprint(*args, **kwargs) -> None:
@@ -195,7 +196,7 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
 
     if not books:
         eprint(f"Не найдено книг по запросу {query}.")
-        exit(ExitCodes.NOTHING_FOUND_BY_QUERY)
+        exit(ExitCodes.NO_BOOKS_FOUND)
     book_names = tuple(map(get_book_name, books))
     for i in range(len(books)):
         eprint(f"{len(books) - i}. {book_names[len(books) - i - 1]}")
@@ -294,13 +295,13 @@ def main():
     if args.id is not None:
         if args.id <= 0:
             eprint("Передан некорректный ID")
-            exit(ExitCodes.NOTHING_FOUND_BY_QUERY)
+            exit(ExitCodes.INVALID_ARGUMENTS)
         download_by_id(args.id, args.link, download_book_f)
     elif args.query:
         download_by_query(args.query, args.link, download_book_f)
     else:
         eprint("Передайте программе либо ID, либо непустой запрос.")
-        exit(ExitCodes.NOTHING_TO_DO)
+        exit(ExitCodes.INVALID_ARGUMENTS)
     exit(ExitCodes.SUCCESS)
 
 
