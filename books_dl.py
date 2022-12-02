@@ -202,7 +202,9 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
     indexes = []
     while not indexes:
         try:
-            indexes = parse_indexes(input("> "), len(books))
+            indexes = parse_indexes(
+                input("Выберите книги для загрузки (например: 1 2 3, 1-3): "), len(books)
+            )
         except ValueError:
             pass
 
