@@ -220,13 +220,19 @@ def download_by_id(id: int, link: bool, download_book_f) -> None:
     id = str(id)
     book = {}
     book["link"] = urljoin(READ_ENDPOINT, id)
-    if link:
-        print(book["link"])
-        exit(ExitCodes.SUCCESS)
-    eprint(f"Загружаем книгу c ID {id}...")
+    if not link:
+        eprint(f"Загружаем книгу c ID {id}...")
     book_text = get_book_text(book)
     bs = BeautifulSoup(book_text, "html.parser")
-    book["name"] = bs.find("head").find("title").text
+    head = bs.find("head")
+    if head:
+        if link:
+            print(book["link"])
+            exit(ExitCodes.SUCCESS)
+    else:
+        eprint(f"Нет книги с ID {id}.")
+        exit(ExitCodes.BOOK_NOT_FOUND)
+    book["name"] = head.find("title").text
     search_results = get_search_results(book["name"])
     for result in search_results:
         if result["id"] == id:
