@@ -62,9 +62,7 @@ def get_book_name(
             length += len(NAME_AND_AUTHORS_SEPARATOR)
             if book["collection"]:
                 need_collection = True
-                collection_length = (
-                    len(book["collection"]) + COLLECTION_SEPARATOR_LENGTH
-                )
+                collection_length = len(book["collection"]) + COLLECTION_SEPARATOR_LENGTH
                 length += collection_length
             for i, author in enumerate(book["authors"]):
                 length += len(author) + len(AUTHORS_SEPARATOR)
@@ -271,9 +269,7 @@ def main():
         type=str,
         help="Директория для загрузки книг. Если не указана, то используется текущая",
     )
-    parser.add_argument(
-        "-nc", "--no-cover", action="store_true", help="Не загружать обложку"
-    )
+    parser.add_argument("-nc", "--no-cover", action="store_true", help="Не загружать обложку")
     parser.add_argument(
         "-l",
         "--link",
