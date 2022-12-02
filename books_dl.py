@@ -125,16 +125,16 @@ def download_book(
     book_name = get_book_name(book, max_file_name_length, book_information_incomplete)
     book_file_path = os.path.join(directory, book_name + ".html")
     if book_text is None:
-        eprint(f"Загружаем книгу в {book_file_path}...")
+        eprint(f"Загружаем книгу в '{book_file_path}'...")
         book_text = get_book_text(book)
     else:
-        eprint(f"Книга загружена в {book_file_path}.")
+        eprint(f"Книга загружена в '{book_file_path}'.")
     with open(book_file_path, "w") as f:
         f.write(book_text)
 
     if download_cover:
         cover_file_path = os.path.join(directory, book_name + ".jpeg")
-        eprint(f"Загружаем обложку в {cover_file_path}...")
+        eprint(f"Загружаем обложку в '{cover_file_path}'...")
         response = requests.get(book["cover"], headers=HEADERS)
         if response.text in ("", "нет облдожки", "нет обложки"):
             eprint("Обложки нет.")
@@ -193,7 +193,7 @@ def download_by_query(query: str, link: bool, download_book_f) -> None:
     books = get_search_results(query)
 
     if not books:
-        eprint(f"Не найдено книг по запросу {query}.")
+        eprint(f"Не найдено книг по запросу '{query}'.")
         exit(ExitCodes.NO_BOOKS_FOUND)
     book_names = tuple(map(get_book_name, books))
     for i in range(len(books)):
