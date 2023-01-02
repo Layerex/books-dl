@@ -55,13 +55,12 @@ def get_book_name(
         COLLECTION_SEPARATOR_LENGTH = 3
 
         need_ellipsis = False
-        need_collection = False
+        need_collection = "collection" in book
         if max_length is not None:
             length = 0
             length += len(book["name"])
             length += len(NAME_AND_AUTHORS_SEPARATOR)
-            if book["collection"]:
-                need_collection = True
+            if need_collection:
                 collection_length = len(book["collection"]) + COLLECTION_SEPARATOR_LENGTH
                 length += collection_length
             for i, author in enumerate(book["authors"]):
