@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 __prog__ = "books-dl"
-__version__ = "0.0.10"
+__version__ = "0.0.11"
 __desc__ = "Консольная утилита для загрузки книжек с одного замечательного сайта."
 
 import argparse
