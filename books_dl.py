@@ -55,7 +55,7 @@ def get_book_name(
         COLLECTION_SEPARATOR_LENGTH = 3
 
         need_ellipsis = False
-        need_collection = "collection" in book
+        need_collection = bool(book["collection"])
         if max_length is not None:
             length = 0
             length += len(book["name"])
